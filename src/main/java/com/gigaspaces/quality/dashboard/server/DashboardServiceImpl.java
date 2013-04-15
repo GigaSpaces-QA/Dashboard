@@ -42,7 +42,7 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
 
 			String sqlFromQueryPart = 
 					"SELECT t1 FROM SgtestResult t1 where t1.timestamp = ( select max(t2.timestamp) " +
-					"from SuiteResult t2 where t2.compoundKey.suiteName = t1.compoundKey.suiteName AND " +
+					"from SgtestResult t2 where t2.compoundKey.suiteName = t1.compoundKey.suiteName AND " +
 					"t2.compoundKey.buildVersion = t1.compoundKey.buildVersion)";
 
 			List<SuiteResult> suiteResults = new ArrayList<SuiteResult>(entityManager.createQuery(sqlFromQueryPart).getResultList());

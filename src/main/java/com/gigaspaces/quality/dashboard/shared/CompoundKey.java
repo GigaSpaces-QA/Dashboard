@@ -18,10 +18,10 @@ public class CompoundKey implements Serializable{
     }
     
 	public CompoundKey(String suiteName, String buildNumber, String buildVersion, String milestone) {
-		this.suiteName = suiteName;
-		this.buildNumber = buildNumber;
-		this.buildVersion = buildVersion;
-		this.milestone = milestone;
+		this.setSuiteName(suiteName);
+		this.setBuildNumber(buildNumber);
+		this.setBuildVersion(buildVersion);
+		this.setMilestone(milestone);
 	}
 
 	public String getSuiteName() {
@@ -61,13 +61,13 @@ public class CompoundKey implements Serializable{
 		final int prime = 31;
 		int result = 1;
 		result = prime * result
-				+ ((buildNumber == null) ? 0 : buildNumber.hashCode());
+				+ ((getBuildNumber() == null) ? 0 : getBuildNumber().hashCode());
 		result = prime * result
-				+ ((buildVersion == null) ? 0 : buildVersion.hashCode());
+				+ ((getBuildVersion() == null) ? 0 : getBuildVersion().hashCode());
 		result = prime * result
-				+ ((milestone == null) ? 0 : milestone.hashCode());
+				+ ((getMilestone() == null) ? 0 : getMilestone().hashCode());
 		result = prime * result
-				+ ((suiteName == null) ? 0 : suiteName.hashCode());
+				+ ((getSuiteName() == null) ? 0 : getSuiteName().hashCode());
 		return result;
 	}
 
@@ -80,25 +80,25 @@ public class CompoundKey implements Serializable{
 		if (getClass() != obj.getClass())
 			return false;
 		CompoundKey other = (CompoundKey) obj;
-		if (buildNumber == null) {
-			if (other.buildNumber != null)
+		if (getBuildNumber() == null) {
+			if (other.getBuildNumber() != null)
 				return false;
-		} else if (!buildNumber.equals(other.buildNumber))
+		} else if (!getBuildNumber().equals(other.getBuildNumber()))
 			return false;
-		if (buildVersion == null) {
-			if (other.buildVersion != null)
+		if (getBuildVersion() == null) {
+			if (other.getBuildVersion() != null)
 				return false;
-		} else if (!buildVersion.equals(other.buildVersion))
+		} else if (!getBuildVersion().equals(other.getBuildVersion()))
 			return false;
-		if (milestone == null) {
-			if (other.milestone != null)
+		if (getMilestone() == null) {
+			if (other.getMilestone() != null)
 				return false;
-		} else if (!milestone.equals(other.milestone))
+		} else if (!getMilestone().equals(other.getMilestone()))
 			return false;
-		if (suiteName == null) {
-			if (other.suiteName != null)
+		if (getSuiteName() == null) {
+			if (other.getSuiteName() != null)
 				return false;
-		} else if (!suiteName.equals(other.suiteName))
+		} else if (!getSuiteName().equals(other.getSuiteName()))
 			return false;
 		return true;
 	}  

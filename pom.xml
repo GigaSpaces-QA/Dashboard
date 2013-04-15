@@ -10,7 +10,7 @@
   <artifactId>Dashboard</artifactId>
   <packaging>war</packaging>
   <version>2.0</version>
-  <name>GWT Maven Archetype</name>
+  <name>Dashboard</name>
 
   <properties>
     <!-- Convenience property to set the GWT version -->
@@ -130,6 +130,14 @@
           <artifactId>mysql-connector-java</artifactId>
           <version>5.1.24</version>
       </dependency>
+      <!--default xerces ha a bug
+      http://forum.springsource.org/showthread.php?34654-JPA-Integration-Testing-w-Maven-StackOverflowError
+      -->
+      <dependency>
+          <groupId>xerces</groupId>
+          <artifactId>xercesImpl</artifactId>
+          <version>2.8.1</version>
+      </dependency>
       <dependency>
           <groupId>org.codehaus.mojo</groupId>
           <artifactId>openjpa-maven-plugin</artifactId>
@@ -194,8 +202,8 @@
         <artifactId>maven-compiler-plugin</artifactId>
         <version>2.3.2</version>
         <configuration>
-          <source>1.5</source>
-          <target>1.5</target>
+          <source>1.6</source>
+          <target>1.6</target>
         </configuration>
       </plugin>
 
@@ -218,19 +226,25 @@
                 </execution>
             </executions>
         </plugin>
-        <plugin>
-            <groupId>org.codehaus.mojo</groupId>
-            <artifactId>openjpa-maven-plugin</artifactId>
-            <version>1.2</version>
-            <executions>
-                <execution>
-                    <phase>package</phase>
-                    <goals>
-                        <goal>enhance</goal>
-                    </goals>
-                </execution>
-            </executions>
-        </plugin>
+
+          <plugin>
+              <groupId>org.codehaus.mojo</groupId>
+              <artifactId>openjpa-maven-plugin</artifactId>
+              <version>1.2</version>
+              <executions>
+                  <execution>
+                      <phase>process-classes</phase>
+                      <goals>
+                          <goal>enhance</goal>
+                      </goals>
+                  </execution>
+              </executions>
+              <configuration>
+                  <persistenceXmlFile>${basedir}/src/main/resources/META-INF/persistence.xml</persistenceXmlFile>
+                  <includes>com/gigaspaces/quality/dashboard/shared/*.class</includes>
+                  <excludes>**/*SuiteHistory*.class</excludes>
+              </configuration>
+          </plugin>
 
     </plugins>
   </build>
