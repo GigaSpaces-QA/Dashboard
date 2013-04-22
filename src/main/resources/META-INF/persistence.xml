@@ -1,12 +1,11 @@
 <?xml version="1.0"?>
 <persistence xmlns="http://java.sun.com/xml/ns/persistence"
-    version="1.0">
+             version="1.0">
 
     <persistence-unit name="dashboard" transaction-type="RESOURCE_LOCAL">
-		<provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>		
-		<class>com.gigaspaces.quality.dashboard.shared.SuiteResult</class>
-        <class>com.gigaspaces.quality.dashboard.shared.CompoundKey</class>		
-	</persistence-unit>
+        <provider>org.apache.openjpa.persistence.PersistenceProviderImpl</provider>
+        <class>com.gigaspaces.quality.dashboard.shared.SuiteResult</class>
+        <class>com.gigaspaces.quality.dashboard.shared.CompoundKey</class>
+    </persistence-unit>
 
-	
 </persistence>

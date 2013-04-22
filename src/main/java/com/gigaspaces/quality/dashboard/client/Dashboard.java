@@ -32,15 +32,19 @@ import org.highchartsgwt.client.utils.SeriesType;
 
 import java.util.*;
 
+
 /**
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Dashboard implements EntryPoint {
+    private int counter = 0;
     private int curComponentsCountPerLastRow = 0;
     private HorizontalPanel _curRowPanel;
     private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
     private DashboardServiceAsync dashboardServiceAsyncService = GWT.create( DashboardService.class );
     private int selectedItem;
+    private DateTimeFormat dateFormatter = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss.S");
+    private DateTimeFormat dateFormatterNoSec = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
 
     public void onModuleLoad() {
 
@@ -63,7 +67,7 @@ public class Dashboard implements EntryPoint {
             public boolean execute() {
                 return refresh(mainPanel);
             }
-        },5 * 60 * 1000);
+        }, 5 * 60 * 1000);
 
 
     }
@@ -78,15 +82,19 @@ public class Dashboard implements EntryPoint {
             public void onSuccess(Map<String, CompoundSuiteHistoryResult> compoundSuiteHistoryResults) {
                 clear(mainPanel);
                 Set<String> keysMap = compoundSuiteHistoryResults.keySet();
+
                 for(String xapVersion : keysMap){
-                    VerticalPanel panel = new VerticalPanel();
-                    verticalPanels.add(panel);
-                    for(SuiteResult result : compoundSuiteHistoryResults.get(xapVersion).getResults()){
-                        addSuiteResult(panel, result, compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName()));
-                    }
-                    mainPanel.add(panel, xapVersion);
-                    _curRowPanel = null;
-                    curComponentsCountPerLastRow = 0;
+                VerticalPanel panel = new VerticalPanel();
+                verticalPanels.add(panel);
+                //String xapVersion = "9.1.0";
+                for(SuiteResult result : compoundSuiteHistoryResults.get(xapVersion).getResults()){
+                    addSuiteResult(panel, result, compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName()));
+                }
+
+                mainPanel.add(panel, xapVersion);
+
+                _curRowPanel = null;
+                curComponentsCountPerLastRow = 0;
                 }
                 mainPanel.selectTab(selectedItem);
             }
@@ -100,9 +108,11 @@ public class Dashboard implements EntryPoint {
     }
 
     public void addSuiteResult(VerticalPanel panel, SuiteResult suiteResult, List<SuiteHistory> history){
-        int clientWidth = Window.getClientWidth();
+        /*int clientWidth = Window.getClientWidth();
         int suiteResultsCellWidth = 350;
-        int suiteResultsCellPerRow = clientWidth/suiteResultsCellWidth;
+        int suiteResultsCellPerRow = clientWidth/suiteResultsCellWidth;*/
+
+        int suiteResultsCellPerRow = 5;
 
         if( curComponentsCountPerLastRow == 0 || curComponentsCountPerLastRow == suiteResultsCellPerRow ){
             _curRowPanel = new HorizontalPanel();
@@ -123,54 +133,65 @@ public class Dashboard implements EntryPoint {
         });
 
         int clientWidth = Window.getClientWidth();
+        int clientHeight = Window.getClientHeight();
 
-        HorizontalPanel suiteResultsCell = new HorizontalPanel();
-        suiteResultsCell.setWidth((int)(clientWidth/suiteResultsCellPerRow-30) + "px");
-        suiteResultsCell.setHeight("200px");
-        suiteResultsCell.setSpacing(3);
+        VerticalPanel resultPanel = new VerticalPanel();
+        Label suiteNameLabel = new Label(suiteResult.getCompoundKey().getSuiteName().replace("_", " ").replace("-", " "));
+        suiteNameLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+
+        resultPanel.add(suiteNameLabel);
+        resultPanel.setWidth(((clientWidth / suiteResultsCellPerRow) - 30) + "px");
+        resultPanel.setHeight(((clientHeight / 8) - 30) + "px");
+        resultPanel.setSpacing(3);
+
+
 
         Image icon = new Image();
 
-        Style style = suiteResultsCell.getElement().getStyle();
+        Style style = resultPanel.getElement().getStyle();
         style.setMarginRight(25, Unit.PX);
         style.setMarginBottom(25, Unit.PX);
         style.setBorderWidth(10, Unit.PX);
         style.setBorderStyle(BorderStyle.SOLID);
         style.setBackgroundColor("#F0F8FF");
-        double passed = Double.valueOf(suiteResult.getPassedTests());
-        double total = Double.valueOf(suiteResult.getTotalTestsRun());
+        int passed = suiteResult.getPassedTests();
+        int total = suiteResult.getTotalTestsRun();
 
         if(total == 0){
             style.setBorderColor("red");
-            icon.setUrl( IconsRepository.ICONS.thumbDown().getURL() );
+            icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
         }else{
             double successRate = (passed/total)*100;
             if(successRate >= 98 && successRate < 100){
                 style.setBorderColor("orange");
-                icon.setUrl( IconsRepository.ICONS.thumbDown().getURL() );
+                icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
             }else{
                 if(successRate < 98){
                     style.setBorderColor("red");
-                    icon.setUrl( IconsRepository.ICONS.thumbDown().getURL() );
+                    icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
                 }else{
                     style.setBorderColor("green");
-                    icon.setUrl( IconsRepository.ICONS.thumbUp().getURL() );
+                    icon.setUrl( IconsRepository.ICONS.thumbUp().getSafeUri() );
                 }
             }
         }
         int daysWithoutRun = 0;
-        DateTimeFormat dateFormatter = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss.S");
+
         Date lastSuiteDate = dateFormatter.parse(suiteResult.getTimestamp());
         daysWithoutRun = getDeltaIndays(new Date(), lastSuiteDate);
 
         Image warningIcon = null;
         if(daysWithoutRun >= 2){
             warningIcon = new Image();
-            warningIcon.setUrl(IconsRepository.ICONS.warning().getURL());
+            warningIcon.setUrl(IconsRepository.ICONS.warning().getSafeUri());
         }
 
-        dateFormatter = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
-        String formattedDate = dateFormatter.format(lastSuiteDate);
+
+        String formattedDate = dateFormatterNoSec.format(lastSuiteDate);
+
+
+        HorizontalPanel suiteResultsCell = new HorizontalPanel();
+
 
         VerticalPanel resultsCell = new VerticalPanel();
         suiteResultsCell.setHorizontalAlignment( HorizontalAlignmentConstant.startOf( com.google.gwt.i18n.client.HasDirection.Direction.LTR ) );
@@ -180,10 +201,7 @@ public class Dashboard implements EntryPoint {
         link.setHref(suiteResult.getSuiteReportLink());
         link.setTarget("_blank");
 
-        Label suiteNameLabel = new Label(suiteResult.getCompoundKey().getSuiteName().replace("_", " ").replace("-", " "));
-        suiteNameLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
 
-        resultsCell.add(suiteNameLabel);
         resultsCell.add(new Label(formattedDate));
         resultsCell.add(new Label(suiteResult.getCompoundKey().getBuildVersion() + " " + suiteResult.getCompoundKey().getMilestone()));
         resultsCell.add(new Label(suiteResult.getCompoundKey().getBuildNumber()));
@@ -224,9 +242,10 @@ public class Dashboard implements EntryPoint {
 
         int chartWIdth = clientWidth/suiteResultsCellPerRow - 150;
         suiteResultsCell.setHorizontalAlignment( HorizontalAlignmentConstant.startOf( com.google.gwt.i18n.client.HasDirection.Direction.RTL ) );
-        suiteResultsCell.add( createChart(chartWIdth ,history) );
-
-        return suiteResultsCell;
+        Chart chart = createChart(chartWIdth, history);
+        suiteResultsCell.add(chart);
+        resultPanel.add(suiteResultsCell);
+        return resultPanel;
     }
 
     private Chart createChart(int width, final List<SuiteHistory> history){
@@ -294,20 +313,29 @@ public class Dashboard implements EntryPoint {
 
         final Chart chart = new Chart(options);
         final String seriesName = "tests_results";
-        final SeriesOptions seriesOptions = new SeriesOptions().name(seriesName).type(SeriesType.SPLINE).lineWidth(1).color("green").markerRadius(14);
+        final SeriesOptions seriesOptions = new SeriesOptions().name(seriesName).type(SeriesType.SPLINE)/*.lineWidth(1).color("green").markerRadius(14)*/;
 
         chart.addAttachHandler( new Handler() {
             @Override
             public void onAttachOrDetach(AttachEvent event) {
+                try{
+                    if( event.isAttached() ){
 
-                if( event.isAttached() ){
-                    chart.addSeries(seriesOptions);
-                    Set<Integer> keysMap = builds.keySet();
-                    for(Integer resultsCounter : keysMap){
-                        SuiteHistory suiteHistory = builds.get(resultsCounter);
-                        chart.addPoint( seriesName, new SeriesPoint().customProperty(suiteHistory.getBuildNumber() ).x(resultsCounter).y(suiteHistory.getPassedTestsHistory()), false);
+                        chart.addSeries(seriesOptions);
+
+                        Set<Integer> keysMap = builds.keySet();
+
+                        int x = 1;
+                        for(Integer resultsCounter : keysMap){
+                            SuiteHistory suiteHistory = builds.get(resultsCounter);
+                            Integer passedTestsHistory = suiteHistory.getPassedTestsHistory();
+                            String buildNumber = suiteHistory.getBuildNumber();
+                            chart.addPoint( seriesName, new SeriesPoint().customProperty(buildNumber).x(resultsCounter).y(passedTestsHistory), false);
+                        }
+                        //chart.redraw();
                     }
-                    chart.redraw();
+                } catch (Throwable t){
+                    t.printStackTrace();
                 }
             }
         } );

@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
        xmlns:context="http://www.springframework.org/schema/context"
-       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd">
+       http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
 
 
     <context:property-placeholder location="classpath:com/gigaspaces/quality/dashboard/mysql.properties"
@@ -11,7 +11,10 @@
 
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
-       <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
+        <!--<property name="url" value="jdbc:mysql://${mysql.host}:${mysql.port}/dashboard"/>
+        <property name="username" value="${mysql.user}"/>
+        <property name="password" value="${mysql.pass}"/>-->
         <property name="url" value="jdbc:mysql://192.168.9.44:3306/dashboard"/>
         <property name="username" value="sa"/>
         <property name="password" value=""/>
@@ -25,6 +28,11 @@
         <property name="persistenceXmlLocation" value="META-INF/persistence.xml"/>
         <property name="jpaVendorAdapter" ref="jpaVendorAdapter"/>
         <property name="jpaDialect" ref="jpaDialect"/>
+        <!--<property name="jpaPropertyMap">
+            <map>
+                <entry key="openjpa.Log" value="DefaultLevel=WARN, Runtime=TRACE, SQL=TRACE" />
+            </map>
+        </property>-->
     </bean>
 
 

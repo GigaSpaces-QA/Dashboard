@@ -78,4 +78,15 @@ public class SuiteHistory implements Serializable, Comparable<SuiteHistory> {
 		}
 		return 0;
 	}
+
+    @Override
+    public String toString() {
+        return "SuiteHistory{" +
+                "buildNumber='" + buildNumber + '\'' +
+                ", buildVersion='" + buildVersion + '\'' +
+                ", milestone='" + milestone + '\'' +
+                ", passedTestsHistory=" + passedTestsHistory +
+                ", timestamp='" + timestamp + '\'' +
+                '}';
+    }
 }
