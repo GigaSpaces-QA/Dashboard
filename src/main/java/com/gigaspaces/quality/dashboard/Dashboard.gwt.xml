@@ -12,6 +12,7 @@
     <!-- <inherits name='com.google.gwt.user.theme.dark.Dark'/>     -->
 
     <!-- Other module inherits                                      -->
+    <inherits name="com.extjs.gxt.ui.GXT" />
     <inherits name="org.highchartsgwt.HighCharts"/>
 
     <!-- compile only for the necessary rendering engines -->

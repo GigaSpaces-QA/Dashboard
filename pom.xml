@@ -12,6 +12,7 @@
 
     <properties>
         <gwtVersion>2.4.0</gwtVersion>
+        <gxt.version>2.2.5</gxt.version>
         <webappDirectory>${project.build.directory}/${project.build.finalName}</webappDirectory>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <springVersion>3.1.3.RELEASE</springVersion>
@@ -23,6 +24,11 @@
         <repository>
             <id>openspaces</id>
             <url>http://maven-repository.openspaces.org</url>
+        </repository>
+        <repository>
+            <id>archiva-maven-repo</id>
+            <name>Archiva</name>
+            <url>http://repo.geosdi.org</url>
         </repository>
     </repositories>
 
@@ -87,16 +93,23 @@
             <version>2.0.1</version>
         </dependency>
         <dependency>
+            <groupId>mysql</groupId>
+            <artifactId>mysql-connector-java</artifactId>
+            <version>5.1.24</version>
+        </dependency>
+        <dependency>
             <groupId>com.gs.webui</groupId>
             <artifactId>highcharts-gwt</artifactId>
             <version>9.6.0-SNAPSHOT</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
-            <groupId>mysql</groupId>
-            <artifactId>mysql-connector-java</artifactId>
-            <version>5.1.24</version>
+            <groupId>com.extjs</groupId>
+            <artifactId>gxt</artifactId>
+            <version>${gxt.version}</version>
+            <scope>provided</scope>
         </dependency>
+
         <!--default xerces ha a bug
         http://forum.springsource.org/showthread.php?34654-JPA-Integration-Testing-w-Maven-StackOverflowError
         -->
@@ -117,7 +130,7 @@
             </exclusions>
         </dependency>
 
-        
+
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
@@ -166,9 +179,9 @@
                     <compileSourcesArtifacts>
                         <artifact>com.gs.webui:highcharts-gwt</artifact>
                         <!-- Maybe will be useful in the future
+                        <artifact>com.gs.webui:raphael-gauges-gwt</artifact>
                         <artifact>com.gs.webui:color-palette-gwt</artifact>
                         <artifact>com.hydro4ge:raphaelgwt</artifact>
-                        <artifact>com.gs.webui:raphael-gauges-gwt</artifact>
                         <artifact>com.gs.webui:graphs-gwt</artifact>
                         <artifact>com.gs.webui:simile-timeline-gwt</artifact>
                         <artifact>com.gs.webui:jquery-widgets-gwt</artifact>
@@ -241,5 +254,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

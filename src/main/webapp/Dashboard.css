@@ -41,3 +41,86 @@ h1 {
 .gwt-TabBar {
     background-color: black !important;
 }
+
+.x-panel-header-text{
+    font-weight: bold;
+    font-size: 1.25em;
+}
+
+.suite-result{
+    font-size: 0.8em;
+    margin-right: 5px;
+    margin-bottom: 5px;
+    border: 5px solid;
+    background-color: #F0F8FF;
+    padding: 2px 2px 2px 2px;
+}
+
+.suite-status{
+    font-size: 2.8em;
+    float: right;
+    /*position: relative;*/
+
+}
+
+.opac{
+    opacity: 0.2;
+}
+
+.non-opac{
+    opacity: 1;
+}
+
+.some-opac{
+    opacity: 0.6;
+}
+
+.red-border {
+    border-color: #E65D5D;
+}
+
+.green-border {
+    border-color: #3AC24A;
+}
+
+.orange-border {
+    border-color: #EABB2F;
+}
+
+.blue-text {
+    color: #2825EE;
+}
+
+.red-text {
+    color: #E65D5D;
+}
+
+.green-text {
+    color: #3AC24A;
+}
+
+.orange-text {
+    color: #EABB2F;
+}
+
+.test-number {
+    font-size: 1.2em;
+    font-weight: bold;
+}
+
+.link{
+    font-size: 0.75em;
+}
+
+.gwt-Image {
+    width: 15px;
+    height: 15px;
+}
+
+.chart-dialog{
+    text-align: center;
+    font-weight: bold;
+    background-color: #F0F8FF;
+    border: solid #000000 2px;
+    border-radius: 10px;
+}

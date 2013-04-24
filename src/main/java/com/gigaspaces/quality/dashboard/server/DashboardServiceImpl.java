@@ -40,11 +40,6 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
             List<String> xapVersions = getXAPVersions(entityManager);
             Map<String, List<SuiteResult>> results = new HashMap<String, List<SuiteResult>>();
 
-//            String sqlFromQueryPart =
-//                    "select t1 from SgtestResult as t1 where t1.timestamp = ( select max(t2.timestamp) " +
-//                            "from SgtestResult as t2 where t2.compoundKey.suiteName = t1.compoundKey.suiteName and " +
-//                            "t2.compoundKey.buildVersion = t1.compoundKey.buildVersion)";
-
             String sqlFromQueryPart = "select * from SgtestResult group by suiteName,buildVersion having max(timestamp)";
 
             List<SuiteResult> suiteResults = new ArrayList<SuiteResult>(
@@ -87,7 +82,7 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
 
     private List<SuiteHistory> getSuiteHistory(EntityManager entityManager, SuiteResult result) {
         List<SuiteHistory> passedTestsHistoryResults = entityManager.createQuery("select new com.gigaspaces.quality.dashboard.shared.SuiteHistory( " +
-                "t1.compoundKey.buildNumber, t1.compoundKey.buildVersion," +" t1.compoundKey.milestone, t1.passedTests, t1.timestamp) from " +
+                "t1.compoundKey.buildNumber, t1.compoundKey.buildVersion," +" t1.compoundKey.milestone, t1.passedTests, t1.totalTestsRun, t1.timestamp) from " +
                 "SgtestResult as t1 where t1.compoundKey.buildVersion = '" + result.getCompoundKey().getBuildVersion() + "'"
                 + " and t1.compoundKey.suiteName = '" + result.getCompoundKey().getSuiteName() + "'" + " order by t1.timestamp desc ", SuiteHistory.class)
                 .setMaxResults(10).getResultList();

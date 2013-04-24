@@ -1,5 +1,17 @@
 package com.gigaspaces.quality.dashboard.client;
 
+
+import com.extjs.gxt.ui.client.event.BaseEvent;
+import com.extjs.gxt.ui.client.event.Events;
+import com.extjs.gxt.ui.client.event.Listener;
+import com.extjs.gxt.ui.client.util.Margins;
+import com.extjs.gxt.ui.client.widget.ContentPanel;
+import com.extjs.gxt.ui.client.widget.Dialog;
+import com.extjs.gxt.ui.client.widget.LayoutContainer;
+import com.extjs.gxt.ui.client.widget.layout.BoxLayout;
+import com.extjs.gxt.ui.client.widget.layout.HBoxLayout;
+import com.extjs.gxt.ui.client.widget.layout.HBoxLayoutData;
+import com.extjs.gxt.ui.client.widget.layout.RowLayout;
 import com.gigaspaces.quality.dashboard.client.icons.IconsRepository;
 import com.gigaspaces.quality.dashboard.shared.CompoundSuiteHistoryResult;
 import com.gigaspaces.quality.dashboard.shared.SuiteHistory;
@@ -8,19 +20,16 @@ import com.google.gwt.core.client.EntryPoint;
 import com.google.gwt.core.client.GWT;
 import com.google.gwt.core.client.Scheduler;
 import com.google.gwt.core.client.Scheduler.RepeatingCommand;
-import com.google.gwt.dom.client.Style;
-import com.google.gwt.dom.client.Style.BorderStyle;
-import com.google.gwt.dom.client.Style.FontWeight;
 import com.google.gwt.dom.client.Style.Unit;
 import com.google.gwt.event.logical.shared.AttachEvent;
 import com.google.gwt.event.logical.shared.AttachEvent.Handler;
 import com.google.gwt.event.logical.shared.SelectionEvent;
 import com.google.gwt.event.logical.shared.SelectionHandler;
 import com.google.gwt.i18n.client.DateTimeFormat;
+import com.google.gwt.i18n.client.NumberFormat;
 import com.google.gwt.user.client.Window;
 import com.google.gwt.user.client.rpc.AsyncCallback;
 import com.google.gwt.user.client.ui.*;
-import com.google.gwt.user.client.ui.HasHorizontalAlignment.HorizontalAlignmentConstant;
 import org.highchartsgwt.client.Chart;
 import org.highchartsgwt.client.formatters.DoubleValueFormatter;
 import org.highchartsgwt.client.formatters.GraphSeriesPointFormatter;
@@ -37,20 +46,25 @@ import java.util.*;
  * Entry point classes define <code>onModuleLoad()</code>.
  */
 public class Dashboard implements EntryPoint {
-    private int counter = 0;
+    public static final String SUITE_REPORT_LINK = "suite report link";
     private int curComponentsCountPerLastRow = 0;
     private HorizontalPanel _curRowPanel;
     private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
     private DashboardServiceAsync dashboardServiceAsyncService = GWT.create( DashboardService.class );
     private int selectedItem;
+    private Chart chart;
+    private AbsolutePanel main = new AbsolutePanel();
     private DateTimeFormat dateFormatter = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss.S");
-    private DateTimeFormat dateFormatterNoSec = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm");
+    private DateTimeFormat dateFormatterNoSec = DateTimeFormat.getFormat("dd/MM/yyyy HH:mm");
+    private NumberFormat percentage = NumberFormat.getFormat("#.##%");
+
 
     public void onModuleLoad() {
-
         RootPanel.getBodyElement().getStyle().setBackgroundColor("black");
         final TabPanel mainPanel = new TabPanel();
         mainPanel.setSize( "100%", "100%");
+        mainPanel.getElement().getStyle().setMarginLeft(5, Unit.PX);
+        mainPanel.getElement().getStyle().setMarginTop(5, Unit.PX);
         mainPanel.addSelectionHandler(new SelectionHandler<Integer>() {
             @Override
             public void onSelection(SelectionEvent<Integer> event) {
@@ -58,7 +72,8 @@ public class Dashboard implements EntryPoint {
 
             }
         });
-        RootPanel.get("resultGrid").add(mainPanel);
+        main.add(mainPanel);
+        RootPanel.get("resultGrid").add(main);
 
         refresh(mainPanel);
 
@@ -84,17 +99,18 @@ public class Dashboard implements EntryPoint {
                 Set<String> keysMap = compoundSuiteHistoryResults.keySet();
 
                 for(String xapVersion : keysMap){
-                VerticalPanel panel = new VerticalPanel();
-                verticalPanels.add(panel);
-                //String xapVersion = "9.1.0";
-                for(SuiteResult result : compoundSuiteHistoryResults.get(xapVersion).getResults()){
-                    addSuiteResult(panel, result, compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName()));
-                }
+                    VerticalPanel panel = new VerticalPanel();
+                    verticalPanels.add(panel);
+                    //String xapVersion = "9.5.1";
 
-                mainPanel.add(panel, xapVersion);
+                    for(SuiteResult result : compoundSuiteHistoryResults.get(xapVersion).getResults()){
+                        addSuiteResult(panel, result, compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName()));
+                    }
 
-                _curRowPanel = null;
-                curComponentsCountPerLastRow = 0;
+                    mainPanel.add(panel, xapVersion);
+
+                    _curRowPanel = null;
+                    curComponentsCountPerLastRow = 0;
                 }
                 mainPanel.selectTab(selectedItem);
             }
@@ -108,11 +124,7 @@ public class Dashboard implements EntryPoint {
     }
 
     public void addSuiteResult(VerticalPanel panel, SuiteResult suiteResult, List<SuiteHistory> history){
-        /*int clientWidth = Window.getClientWidth();
-        int suiteResultsCellWidth = 350;
-        int suiteResultsCellPerRow = clientWidth/suiteResultsCellWidth;*/
-
-        int suiteResultsCellPerRow = 5;
+        int suiteResultsCellPerRow = 6;
 
         if( curComponentsCountPerLastRow == 0 || curComponentsCountPerLastRow == suiteResultsCellPerRow ){
             _curRowPanel = new HorizontalPanel();
@@ -125,60 +137,65 @@ public class Dashboard implements EntryPoint {
     }
 
 
-    private Widget createSuiteResultsGridCell(SuiteResult suiteResult, List<SuiteHistory> history, int suiteResultsCellPerRow){
+    private Widget createSuiteResultsGridCell(SuiteResult suiteResult, final List<SuiteHistory> history, final int suiteResultsCellPerRow){
         Collections.sort(history, new Comparator<SuiteHistory>() {
             public int compare(SuiteHistory s1, SuiteHistory s2) {
                 return s1.compareTo(s2);
             }
         });
 
-        int clientWidth = Window.getClientWidth();
-        int clientHeight = Window.getClientHeight();
+        final int clientWidth = Window.getClientWidth();
+        final int clientHeight = Window.getClientHeight();
 
-        VerticalPanel resultPanel = new VerticalPanel();
-        Label suiteNameLabel = new Label(suiteResult.getCompoundKey().getSuiteName().replace("_", " ").replace("-", " "));
-        suiteNameLabel.getElement().getStyle().setFontWeight(FontWeight.BOLD);
+        RowLayout rowLayout = new RowLayout(com.extjs.gxt.ui.client.Style.Orientation.VERTICAL);
+        final ContentPanel contentPanel = new ContentPanel(rowLayout);
+        final String suiteName = suiteResult.getCompoundKey().getSuiteName().replace("_", " ").replace("-", " ");
+        String name = suiteName.length() <= 22  && countUpperCaseLetters(suiteName) < 18 ? suiteName + "<br> </br>" : suiteName;
+        contentPanel.setHeading(name);
+        contentPanel.getHeader().setHeight("30px");
+        contentPanel.setStyleName("suite-result");
 
-        resultPanel.add(suiteNameLabel);
-        resultPanel.setWidth(((clientWidth / suiteResultsCellPerRow) - 30) + "px");
-        resultPanel.setHeight(((clientHeight / 8) - 30) + "px");
-        resultPanel.setSpacing(3);
+        final int width = (clientWidth / suiteResultsCellPerRow) - 10;
+        contentPanel.setWidth(width);
+        final int height = (clientHeight / 4) - 10;
+        contentPanel.setHeight(height);
 
-
-
-        Image icon = new Image();
-
-        Style style = resultPanel.getElement().getStyle();
-        style.setMarginRight(25, Unit.PX);
-        style.setMarginBottom(25, Unit.PX);
-        style.setBorderWidth(10, Unit.PX);
-        style.setBorderStyle(BorderStyle.SOLID);
-        style.setBackgroundColor("#F0F8FF");
         int passed = suiteResult.getPassedTests();
         int total = suiteResult.getTotalTestsRun();
 
+        Image icon = new Image();
+
+        com.extjs.gxt.ui.client.widget.Label statusLabel = new com.extjs.gxt.ui.client.widget.Label();
+        statusLabel.setStyleName("suite-status");
+
         if(total == 0){
-            style.setBorderColor("red");
+            statusLabel.setText("No Test Runs");
+            statusLabel.addStyleName("red-text");
             icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
         }else{
-            double successRate = (passed/total)*100;
-            if(successRate >= 98 && successRate < 100){
-                style.setBorderColor("orange");
+            double successRate = ((double)passed / total);
+            statusLabel.setText(percentage.format(successRate));
+            if(successRate >= 0.98 && successRate < 1){
+                contentPanel.addStyleName("orange-border");
+                statusLabel.addStyleName("orange-text");
                 icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
             }else{
-                if(successRate < 98){
-                    style.setBorderColor("red");
+                if(successRate < 0.98){
+                    contentPanel.addStyleName("red-border");
+                    statusLabel.addStyleName("red-text");
                     icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
                 }else{
-                    style.setBorderColor("green");
+                    contentPanel.addStyleName("green-border");
+                    statusLabel.addStyleName("green-text");
                     icon.setUrl( IconsRepository.ICONS.thumbUp().getSafeUri() );
                 }
             }
         }
+
         int daysWithoutRun = 0;
 
         Date lastSuiteDate = dateFormatter.parse(suiteResult.getTimestamp());
-        daysWithoutRun = getDeltaIndays(new Date(), lastSuiteDate);
+        daysWithoutRun = getDeltaInDays(new Date(), lastSuiteDate);
 
         Image warningIcon = null;
         if(daysWithoutRun >= 2){
@@ -189,76 +206,112 @@ public class Dashboard implements EntryPoint {
 
         String formattedDate = dateFormatterNoSec.format(lastSuiteDate);
 
+        //add details of last run
+        LayoutContainer detailsPanel = new LayoutContainer();
+        detailsPanel.add(new Label(formattedDate));
+        final String version = suiteResult.getCompoundKey().getBuildVersion() + " " + suiteResult.getCompoundKey().getMilestone();
+        final String buildNumber = suiteResult.getCompoundKey().getBuildNumber();
+        detailsPanel.add(new Label(version + " - " + buildNumber));
 
-        HorizontalPanel suiteResultsCell = new HorizontalPanel();
 
+        final List<Widget> widgetList = new ArrayList<Widget>();
+        widgetList.add(detailsPanel);
 
-        VerticalPanel resultsCell = new VerticalPanel();
-        suiteResultsCell.setHorizontalAlignment( HorizontalAlignmentConstant.startOf( com.google.gwt.i18n.client.HasDirection.Direction.LTR ) );
-        suiteResultsCell.add(resultsCell);
+        //add passed/failed numbers
+        HBoxLayout hBoxPassedLayout = new HBoxLayout();
+        hBoxPassedLayout.setHBoxLayoutAlign(HBoxLayout.HBoxLayoutAlign.MIDDLE);
+        hBoxPassedLayout.setPack(BoxLayout.BoxLayoutPack.START);
+        LayoutContainer passedTestsPanel = new LayoutContainer();
 
+        com.extjs.gxt.ui.client.widget.Label passedLabel = new com.extjs.gxt.ui.client.widget.Label(suiteResult.getPassedTests() +"");
+        passedLabel.setTitle("# passed tests");
+        passedLabel.addStyleName("green-text");
+
+        com.extjs.gxt.ui.client.widget.Label failedLabel = new com.extjs.gxt.ui.client.widget.Label(suiteResult.getFailedTests() +"");
+        failedLabel.setTitle("# failed tests");
+        failedLabel.addStyleName("red-text");
+
+        com.extjs.gxt.ui.client.widget.Label totalLabel = new com.extjs.gxt.ui.client.widget.Label(suiteResult.getTotalTestsRun() +"");
+        totalLabel.setTitle("# total tests");
+        totalLabel.addStyleName("blue-text");
+
+        HBoxLayoutData hBoxPassedLayoutData = new HBoxLayoutData(new Margins(0, 5, 0, 0));
+        passedTestsPanel.add(passedLabel, hBoxPassedLayoutData);
+        passedTestsPanel.add(new com.extjs.gxt.ui.client.widget.Label("|"), hBoxPassedLayoutData);
+        passedTestsPanel.add(failedLabel, hBoxPassedLayoutData);
+        passedTestsPanel.add(new com.extjs.gxt.ui.client.widget.Label("|"), hBoxPassedLayoutData);
+        passedTestsPanel.add(totalLabel, new HBoxLayoutData(new Margins(0)));
+
+        widgetList.add(passedTestsPanel);
+
+        //add status icons and percentage
+        HBoxLayout hBoxStatusLayout = new HBoxLayout();
+        hBoxStatusLayout.setHBoxLayoutAlign(HBoxLayout.HBoxLayoutAlign.MIDDLE);
+        hBoxStatusLayout.setPack(BoxLayout.BoxLayoutPack.START);
+        LayoutContainer statusPanel = new LayoutContainer();
+
+        statusPanel.setLayout(hBoxStatusLayout);
+        HBoxLayoutData hBoxStatusLayoutData = new HBoxLayoutData(new Margins(0, 20, 0, 0));
+        statusPanel.add(icon, hBoxStatusLayoutData);
+        if(warningIcon != null){
+            statusPanel.add(warningIcon, hBoxStatusLayoutData);
+        }
+        statusPanel.add(statusLabel, new HBoxLayoutData(new Margins(0)));
+        widgetList.add(statusPanel);
+
+        //add suite link
         Anchor link = new Anchor("Suite Report", true);
         link.setHref(suiteResult.getSuiteReportLink());
         link.setTarget("_blank");
+        link.setTitle(SUITE_REPORT_LINK);
+        link.addStyleName("link");
+
+        widgetList.add(link);
 
 
-        resultsCell.add(new Label(formattedDate));
-        resultsCell.add(new Label(suiteResult.getCompoundKey().getBuildVersion() + " " + suiteResult.getCompoundKey().getMilestone()));
-        resultsCell.add(new Label(suiteResult.getCompoundKey().getBuildNumber()));
+        //add components to main widget
+        addAllWidgets(contentPanel, widgetList);
 
-        HorizontalPanel resultsPanel = new HorizontalPanel();
+        //add listener to display th chart
+        contentPanel.addListener(Events.OnClick, new Listener<BaseEvent>() {
+            @Override
+            public void handleEvent(BaseEvent baseEvent) {
+                chart = createChart(width * 2, history);
+                final Dialog simple = new Dialog();
+                //simple.setBodyStyleName("chart-dialog");
+                simple.setStyleName("chart-dialog");
+                simple.setAutoWidth(true);
+                simple.setButtons(Dialog.OK);
+                simple.setHeading(version + " - " + suiteName + " History");
+                simple.add(chart);
+                simple.getItem(0).getFocusSupport().setIgnore(true);
+                simple.setScrollMode(com.extjs.gxt.ui.client.Style.Scroll.AUTO);
+                simple.setHideOnButtonClick(true);
+                //this is for weird resizing problem
+                simple.removeAllListeners();
+                simple.show();
+            }
+        });
 
-        Label passedLabel = new Label(suiteResult.getPassedTests() +"");
-        Style passedStyle = passedLabel.getElement().getStyle();
-        passedStyle.setColor("green");
-        passedStyle.setFontWeight(FontWeight.BOLD);
+        return contentPanel;
+    }
 
-        Label failedLabel = new Label(suiteResult.getFailedTests() +"");
-        Style failedStyle = failedLabel.getElement().getStyle();
-        failedStyle.setColor("red");
-        failedStyle.setFontWeight(FontWeight.BOLD);
-
-        Label totalLabel = new Label(suiteResult.getTotalTestsRun() +"");
-        Style totalStyle = totalLabel.getElement().getStyle();
-        totalStyle.setColor("blue");
-        totalStyle.setFontWeight(FontWeight.BOLD);
-
-        resultsPanel.add(passedLabel);
-        resultsPanel.add(new Label( "|"));
-        resultsPanel.add(failedLabel);
-        resultsPanel.add(new Label( "|"));
-        resultsPanel.add(totalLabel);
-
-
-        resultsCell.add(resultsPanel);
-        HorizontalPanel iconsPanel = new HorizontalPanel();
-        iconsPanel.add(icon);
-        resultsCell.add(iconsPanel);
-        if(warningIcon != null){
-            iconsPanel.add(warningIcon);
+    private void addAllWidgets(ContentPanel contentPanel, List<Widget> widgetList) {
+        for (Widget widget : widgetList) {
+            contentPanel.add(widget);
         }
-        resultsCell.add(link);
-
-
-        int chartWIdth = clientWidth/suiteResultsCellPerRow - 150;
-        suiteResultsCell.setHorizontalAlignment( HorizontalAlignmentConstant.startOf( com.google.gwt.i18n.client.HasDirection.Direction.RTL ) );
-        Chart chart = createChart(chartWIdth, history);
-        suiteResultsCell.add(chart);
-        resultPanel.add(suiteResultsCell);
-        return resultPanel;
     }
 
     private Chart createChart(int width, final List<SuiteHistory> history){
         final Map<Integer, SuiteHistory> builds = new LinkedHashMap<Integer, SuiteHistory>();
-        int max = 0;
+        double min = Double.MAX_VALUE;
 
 
         final int resultsSize = history.size();
         int resultsCounter = 0;
         for(SuiteHistory suiteHistory : history){
-            builds.put( resultsCounter, suiteHistory);
-            max = Math.max(max, suiteHistory.getPassedTestsHistory());
-            resultsCounter++;
+            builds.put( resultsCounter++, suiteHistory);
+            min = Math.min(min, (double) suiteHistory.getPassedTestsHistory() / suiteHistory.getTotalTestsHistory() * 100);
         }
 
         DoubleValueFormatter xAxisFormatter = new DoubleValueFormatter() {
@@ -287,10 +340,9 @@ public class Dashboard implements EntryPoint {
         ChartOptions options = new ChartOptions().width(width).height(200).markerRadius(3)
                 .toolTipFormatter(tooltipFormatter)
                 .xAxisFormatter(xAxisFormatter)
-                .minYValue(0).maxYValue(max)
+                .minYValue(Math.max(0, (int)min - 2)).maxYValue(102)
                 .colors("#4572A7", "#AA4643", "#89A54E", "#80699B", "#3D96AE", "#DB843D", "#92A8CD", "#A47D7C", "#B5CA92")
                 .yAxisTickPixelInterval( 50 )
-                .xAxisType( AxisType.LINEAR )
                 .xAxisLineColor("#6098BF")
                 .xAxisGridLineColor("#98BCD5")
                 .yAxisLineColor("#6098BF")
@@ -304,16 +356,16 @@ public class Dashboard implements EntryPoint {
                 .marginLeft(30)
                 .marginBottom(32)
                 .yAxisTickPixelInterval(20)
-                .xAxisLabelFontColor( "#5086ab" )
-                .xAxisLabelFontSize( "10px" )
-                .xAxisLabelFontFamily( "tahoma" )
-                .yAxisLabelFontColor( "#6098bf" )
-                .yAxisLabelFontSize( "8px" )
-                .yAxisLabelFontFamily( "arial" );
+                .xAxisLabelFontColor("#5086ab")
+                .xAxisLabelFontSize("10px")
+                .xAxisLabelFontFamily("tahoma")
+                .yAxisLabelFontColor("#6098bf")
+                .yAxisLabelFontSize("8px")
+                .yAxisLabelFontFamily("arial");
 
         final Chart chart = new Chart(options);
         final String seriesName = "tests_results";
-        final SeriesOptions seriesOptions = new SeriesOptions().name(seriesName).type(SeriesType.SPLINE)/*.lineWidth(1).color("green").markerRadius(14)*/;
+        final SeriesOptions seriesOptions = new SeriesOptions().name(seriesName).type(SeriesType.SPLINE);
 
         chart.addAttachHandler( new Handler() {
             @Override
@@ -325,14 +377,14 @@ public class Dashboard implements EntryPoint {
 
                         Set<Integer> keysMap = builds.keySet();
 
-                        int x = 1;
-                        for(Integer resultsCounter : keysMap){
+                        for(int resultsCounter : keysMap){
                             SuiteHistory suiteHistory = builds.get(resultsCounter);
-                            Integer passedTestsHistory = suiteHistory.getPassedTestsHistory();
+                            double percentPassed = ((double)suiteHistory.getPassedTestsHistory() / suiteHistory.getTotalTestsHistory() * 100);
                             String buildNumber = suiteHistory.getBuildNumber();
-                            chart.addPoint( seriesName, new SeriesPoint().customProperty(buildNumber).x(resultsCounter).y(passedTestsHistory), false);
+                            chart.addPoint( seriesName, new SeriesPoint().customProperty(buildNumber).x(resultsCounter).y(percentPassed), false);
                         }
-                        //chart.redraw();
+
+                        chart.redraw();
                     }
                 } catch (Throwable t){
                     t.printStackTrace();
@@ -344,10 +396,24 @@ public class Dashboard implements EntryPoint {
 
     public static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L;
 
-    static public int getDeltaIndays(Date latterDate, Date earlierDate) {
+    static public int getDeltaInDays(Date latterDate, Date earlierDate) {
         long deltaInMillis = latterDate.getTime() - earlierDate.getTime();
-        int deltaInWeeks = (int)(deltaInMillis / MILLIS_PER_DAY);
-        return deltaInWeeks;
+        return (int)(deltaInMillis / MILLIS_PER_DAY);
     }
 
+    static public int countUpperCaseLetters(String toCount){
+        int upperCaseCount = 0;
+
+        for (int i=0; i<toCount.length(); i++)
+        {
+            for(char c = 'A';  c <= 'Z'; c++)
+            {
+                if (toCount.charAt(i) == c)
+                {
+                    upperCaseCount++;
+                }
+            }
+        }
+        return upperCaseCount;
+    }
 }

@@ -12,12 +12,9 @@
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource" destroy-method="close">
         <property name="driverClassName" value="com.mysql.jdbc.Driver"/>
-        <!--<property name="url" value="jdbc:mysql://${mysql.host}:${mysql.port}/dashboard"/>
+        <property name="url" value="jdbc:mysql://${mysql.host}:${mysql.port}/dashboard"/>
         <property name="username" value="${mysql.user}"/>
-        <property name="password" value="${mysql.pass}"/>-->
-        <property name="url" value="jdbc:mysql://192.168.9.44:3306/dashboard"/>
-        <property name="username" value="sa"/>
-        <property name="password" value=""/>
+        <property name="password" value="${mysql.pass}"/>
         <property name="maxActive" value="100"/>
         <property name="initialSize" value="10"/>
     </bean>
