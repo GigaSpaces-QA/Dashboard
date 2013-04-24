@@ -340,7 +340,7 @@ public class Dashboard implements EntryPoint {
         ChartOptions options = new ChartOptions().width(width).height(200).markerRadius(3)
                 .toolTipFormatter(tooltipFormatter)
                 .xAxisFormatter(xAxisFormatter)
-                .minYValue(Math.max(0, (int)min - 2)).maxYValue(102)
+                .minYValue(Math.max(0, (int)min - 2)).maxYValue(100)
                 .colors("#4572A7", "#AA4643", "#89A54E", "#80699B", "#3D96AE", "#DB843D", "#92A8CD", "#A47D7C", "#B5CA92")
                 .yAxisTickPixelInterval( 50 )
                 //.xAxisType( AxisType.LINEAR )
