@@ -343,6 +343,7 @@ public class Dashboard implements EntryPoint {
                 .minYValue(Math.max(0, (int)min - 2)).maxYValue(102)
                 .colors("#4572A7", "#AA4643", "#89A54E", "#80699B", "#3D96AE", "#DB843D", "#92A8CD", "#A47D7C", "#B5CA92")
                 .yAxisTickPixelInterval( 50 )
+                //.xAxisType( AxisType.LINEAR )
                 .xAxisLineColor("#6098BF")
                 .xAxisGridLineColor("#98BCD5")
                 .yAxisLineColor("#6098BF")
