@@ -96,8 +96,10 @@ public class Dashboard implements EntryPoint {
             public void onSuccess(Map<String, CompoundSuiteHistoryResult> compoundSuiteHistoryResults) {
                 clear(mainPanel);
                 Set<String> keysMap = compoundSuiteHistoryResults.keySet();
-
-                for(String xapVersion : keysMap){
+                ArrayList<String> versions = new ArrayList<String>(keysMap);
+                Collections.sort(versions);
+                Collections.reverse(versions);
+                for(String xapVersion : versions){
                     VerticalPanel panel = new VerticalPanel();
                     verticalPanels.add(panel);
                     //String xapVersion = "9.5.1";
