@@ -10,16 +10,27 @@ public class SuiteHistory implements Serializable, Comparable<SuiteHistory> {
     private String milestone;
     private Integer passedTestsHistory;
     private Integer totalTestsHistory;
+
+    public Integer getSkippedTestsHistory() {
+        return skippedTestsHistory;
+    }
+
+    public void setSkippedTestsHistory(Integer skippedTestsHistory) {
+        this.skippedTestsHistory = skippedTestsHistory;
+    }
+
+    private Integer skippedTestsHistory;
     private String timestamp;
     
 	public SuiteHistory() {}
 	
-	public SuiteHistory(String buildNumber, String buildVersion, String milestone, Integer passedTestsHistory, Integer totalTestsHistory, String timestamp) {
+	public SuiteHistory(String buildNumber, String buildVersion, String milestone, Integer passedTestsHistory, Integer totalTestsHistory, Integer skippedTestsHistory, String timestamp) {
 		this.buildNumber = buildNumber;
 		this.buildVersion = buildVersion;
 		this.milestone = milestone;
 		this.passedTestsHistory = passedTestsHistory;
         this.totalTestsHistory = totalTestsHistory;
+        this.skippedTestsHistory = skippedTestsHistory;
 		this.timestamp = timestamp;
 	}
 	public String getBuildNumber() {
@@ -89,14 +100,4 @@ public class SuiteHistory implements Serializable, Comparable<SuiteHistory> {
 		return 0;
 	}
 
-    @Override
-    public String toString() {
-        return "SuiteHistory{" +
-                "buildNumber='" + buildNumber + '\'' +
-                ", buildVersion='" + buildVersion + '\'' +
-                ", milestone='" + milestone + '\'' +
-                ", passedTestsHistory=" + passedTestsHistory +
-                ", timestamp='" + timestamp + '\'' +
-                '}';
-    }
 }

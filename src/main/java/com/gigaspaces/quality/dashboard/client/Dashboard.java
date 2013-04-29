@@ -35,7 +35,6 @@ import org.highchartsgwt.client.formatters.DoubleValueFormatter;
 import org.highchartsgwt.client.formatters.GraphSeriesPointFormatter;
 import org.highchartsgwt.client.options.ChartOptions;
 import org.highchartsgwt.client.options.SeriesOptions;
-import org.highchartsgwt.client.utils.AxisType;
 import org.highchartsgwt.client.utils.SeriesPoint;
 import org.highchartsgwt.client.utils.SeriesType;
 
@@ -102,12 +101,15 @@ public class Dashboard implements EntryPoint {
                     VerticalPanel panel = new VerticalPanel();
                     verticalPanels.add(panel);
                     //String xapVersion = "9.5.1";
-
+                    String cloudifyVersion = "";
                     for(SuiteResult result : compoundSuiteHistoryResults.get(xapVersion).getResults()){
-                        addSuiteResult(panel, result, compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName()));
+                        List<SuiteHistory> history = compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName());
+                        addSuiteResult(panel, result, history);
+                        if(cloudifyVersion.equals("") && history.size() != 0 && !xapVersion.equals(history.get(0).getBuildVersion()))
+                            cloudifyVersion = "/" + history.get(0).getBuildVersion();
                     }
 
-                    mainPanel.add(panel, xapVersion);
+                    mainPanel.add(panel, xapVersion + cloudifyVersion);
 
                     _curRowPanel = null;
                     curComponentsCountPerLastRow = 0;
@@ -192,7 +194,7 @@ public class Dashboard implements EntryPoint {
             }
         }
 
-        int daysWithoutRun = 0;
+        long daysWithoutRun = 0;
 
         Date lastSuiteDate = dateFormatter.parse(suiteResult.getTimestamp());
         daysWithoutRun = getDeltaInDays(new Date(), lastSuiteDate);
@@ -227,6 +229,10 @@ public class Dashboard implements EntryPoint {
         passedLabel.setTitle("# passed tests");
         passedLabel.addStyleName("green-text");
 
+        com.extjs.gxt.ui.client.widget.Label skippedLabel = new com.extjs.gxt.ui.client.widget.Label(suiteResult.getSkippedTests() +"");
+        skippedLabel.setTitle("# skipped tests");
+        skippedLabel.addStyleName("orange-text");
+
         com.extjs.gxt.ui.client.widget.Label failedLabel = new com.extjs.gxt.ui.client.widget.Label(suiteResult.getFailedTests() +"");
         failedLabel.setTitle("# failed tests");
         failedLabel.addStyleName("red-text");
@@ -239,6 +245,8 @@ public class Dashboard implements EntryPoint {
         passedTestsPanel.add(passedLabel, hBoxPassedLayoutData);
         passedTestsPanel.add(new com.extjs.gxt.ui.client.widget.Label("|"), hBoxPassedLayoutData);
         passedTestsPanel.add(failedLabel, hBoxPassedLayoutData);
+        passedTestsPanel.add(new com.extjs.gxt.ui.client.widget.Label("|"), hBoxPassedLayoutData);
+        passedTestsPanel.add(skippedLabel, hBoxPassedLayoutData);
         passedTestsPanel.add(new com.extjs.gxt.ui.client.widget.Label("|"), hBoxPassedLayoutData);
         passedTestsPanel.add(totalLabel, new HBoxLayoutData(new Margins(0)));
 
@@ -397,9 +405,9 @@ public class Dashboard implements EntryPoint {
 
     public static final long MILLIS_PER_DAY = 24L * 60L * 60L * 1000L;
 
-    static public int getDeltaInDays(Date latterDate, Date earlierDate) {
+    static public long getDeltaInDays(Date latterDate, Date earlierDate) {
         long deltaInMillis = latterDate.getTime() - earlierDate.getTime();
-        return (int)(deltaInMillis / MILLIS_PER_DAY);
+        return deltaInMillis / MILLIS_PER_DAY;
     }
 
     static public int countUpperCaseLetters(String toCount){

@@ -82,7 +82,7 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
 
     private List<SuiteHistory> getSuiteHistory(EntityManager entityManager, SuiteResult result) {
         List<SuiteHistory> passedTestsHistoryResults = entityManager.createQuery("select new com.gigaspaces.quality.dashboard.shared.SuiteHistory( " +
-                "t1.compoundKey.buildNumber, t1.compoundKey.buildVersion," +" t1.compoundKey.milestone, t1.passedTests, t1.totalTestsRun, t1.timestamp) from " +
+                "t1.compoundKey.buildNumber, t1.compoundKey.buildVersion," +" t1.compoundKey.milestone, t1.passedTests, t1.totalTestsRun, t1.skippedTests, t1.timestamp) from " +
                 "SgtestResult as t1 where t1.compoundKey.buildVersion = '" + result.getCompoundKey().getBuildVersion() + "'"
                 + " and t1.compoundKey.suiteName = '" + result.getCompoundKey().getSuiteName() + "'" + " order by t1.timestamp desc ", SuiteHistory.class)
                 .setMaxResults(10).getResultList();
@@ -106,7 +106,8 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
         for(CompoundSuiteHistoryResult  compoundSuiteHistoryResult : results.values()){
             Collections.sort(compoundSuiteHistoryResult.getResults(), new Comparator<SuiteResult>(){
                 public int compare(SuiteResult s1, SuiteResult s2) {
-                    return -1 * (Integer.valueOf(s1.getFailedTests()).compareTo(s2.getFailedTests()));
+                    double diff = (100 * s1.getPassedTests() / (double) s1.getTotalTestsRun()) - (100 * s2.getPassedTests() / (double) s2.getTotalTestsRun());
+                    return diff > 0 ? 1 : diff < 0 ? -1 : 0;
                 }
             });
         }
