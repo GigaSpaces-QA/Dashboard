@@ -106,7 +106,7 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
         for(CompoundSuiteHistoryResult  compoundSuiteHistoryResult : results.values()){
             Collections.sort(compoundSuiteHistoryResult.getResults(), new Comparator<SuiteResult>(){
                 public int compare(SuiteResult s1, SuiteResult s2) {
-                    double diff = (100 * s1.getPassedTests() / (double) s1.getTotalTestsRun()) - (100 * s2.getPassedTests() / (double) s2.getTotalTestsRun());
+                    double diff = (s1.getPassedTests() / (double) s1.getTotalTestsRun()) - (s2.getPassedTests() / (double) s2.getTotalTestsRun());
                     return diff > 0 ? 1 : diff < 0 ? -1 : 0;
                 }
             });

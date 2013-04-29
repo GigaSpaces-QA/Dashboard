@@ -50,7 +50,7 @@ public class Dashboard implements EntryPoint {
     private HorizontalPanel _curRowPanel;
     private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
     private DashboardServiceAsync dashboardServiceAsyncService = GWT.create( DashboardService.class );
-    private int selectedItem;
+    private int selectedItem = 0;
     private Chart chart;
     private AbsolutePanel main = new AbsolutePanel();
     private DateTimeFormat dateFormatter = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss.S");
