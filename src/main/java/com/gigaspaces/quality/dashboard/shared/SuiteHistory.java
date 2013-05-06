@@ -10,28 +10,25 @@ public class SuiteHistory implements Serializable, Comparable<SuiteHistory> {
     private String milestone;
     private Integer passedTestsHistory;
     private Integer totalTestsHistory;
-
-    public Integer getSkippedTestsHistory() {
-        return skippedTestsHistory;
-    }
-
-    public void setSkippedTestsHistory(Integer skippedTestsHistory) {
-        this.skippedTestsHistory = skippedTestsHistory;
-    }
-
     private Integer skippedTestsHistory;
+    private Integer suspectedTestsHistory;
     private String timestamp;
+    private String type;
     
 	public SuiteHistory() {}
 	
-	public SuiteHistory(String buildNumber, String buildVersion, String milestone, Integer passedTestsHistory, Integer totalTestsHistory, Integer skippedTestsHistory, String timestamp) {
+	public SuiteHistory(String buildNumber, String buildVersion, String milestone,
+                        Integer passedTestsHistory, Integer totalTestsHistory, Integer skippedTestsHistory, Integer suspectedTestsHistory,
+                        String timestamp, String type) {
 		this.buildNumber = buildNumber;
 		this.buildVersion = buildVersion;
 		this.milestone = milestone;
 		this.passedTestsHistory = passedTestsHistory;
         this.totalTestsHistory = totalTestsHistory;
         this.skippedTestsHistory = skippedTestsHistory;
+        this.suspectedTestsHistory = suspectedTestsHistory;
 		this.timestamp = timestamp;
+        this.type = type;
 	}
 	public String getBuildNumber() {
 		return buildNumber;
@@ -74,7 +71,32 @@ public class SuiteHistory implements Serializable, Comparable<SuiteHistory> {
         this.totalTestsHistory = totalTestsHistory;
     }
 
-	@Override
+    public Integer getSkippedTestsHistory() {
+        return skippedTestsHistory;
+    }
+
+    public void setSkippedTestsHistory(Integer skippedTestsHistory) {
+        this.skippedTestsHistory = skippedTestsHistory;
+    }
+
+
+    public Integer getSuspectedTestsHistory() {
+        return suspectedTestsHistory;
+    }
+
+    public void setSuspectedTestsHistory(Integer suspectedTestsHistory) {
+        this.suspectedTestsHistory = suspectedTestsHistory;
+    }
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
+    @Override
 	public int compareTo(SuiteHistory suiteHistory) {
 		String[] b = this.buildNumber.split("-");
 		int high = Integer.valueOf(b[0]);

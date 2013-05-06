@@ -22,6 +22,7 @@ public class SuiteResult implements Serializable {
 	private int orphans;
 	private String suiteReportLink;
 	private String jvmType;
+    private String type;
 
 	public SuiteResult() {
 		
@@ -122,5 +123,14 @@ public class SuiteResult implements Serializable {
 
 	public void setJvmType(String jvmType) {
 		this.jvmType = jvmType;
-	}	
+	}
+
+    public String getType() {
+        return type;
+    }
+
+    public void setType(String type) {
+        this.type = type;
+    }
+
 }

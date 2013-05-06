@@ -46,6 +46,7 @@ import java.util.*;
  */
 public class Dashboard implements EntryPoint {
     public static final String SUITE_REPORT_LINK = "suite report link";
+    public static final String TGRID = "tgrid";
     private int curComponentsCountPerLastRow = 0;
     private HorizontalPanel _curRowPanel;
     private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
@@ -55,7 +56,7 @@ public class Dashboard implements EntryPoint {
     private AbsolutePanel main = new AbsolutePanel();
     private DateTimeFormat dateFormatter = DateTimeFormat.getFormat("yyyy-MM-dd HH:mm:ss.S");
     private DateTimeFormat dateFormatterNoSec = DateTimeFormat.getFormat("dd/MM/yyyy HH:mm");
-    private NumberFormat percentage = NumberFormat.getFormat("#.##%");
+    private NumberFormat percentage = NumberFormat.getFormat("#.#%");
 
 
     public void onModuleLoad() {
@@ -166,7 +167,7 @@ public class Dashboard implements EntryPoint {
 
         int passed = suiteResult.getPassedTests();
         int total = suiteResult.getTotalTestsRun();
-
+        int suspectedTests = suiteResult.getSuspectedTests();
         Image icon = new Image();
 
         com.extjs.gxt.ui.client.widget.Label statusLabel = new com.extjs.gxt.ui.client.widget.Label();
@@ -177,7 +178,8 @@ public class Dashboard implements EntryPoint {
             statusLabel.addStyleName("red-text");
             icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
         }else{
-            double successRate = ((double)passed / total);
+
+            double successRate = ((double)passed / (total - suspectedTests));
             statusLabel.setText(percentage.format(successRate));
             if(successRate >= 0.98 && successRate < 1){
                 contentPanel.addStyleName("orange-border");
@@ -231,8 +233,10 @@ public class Dashboard implements EntryPoint {
         passedLabel.setTitle("# passed tests");
         passedLabel.addStyleName("green-text");
 
-        com.extjs.gxt.ui.client.widget.Label skippedLabel = new com.extjs.gxt.ui.client.widget.Label(suiteResult.getSkippedTests() +"");
-        skippedLabel.setTitle("# skipped tests");
+        int skippedTests = suiteResult.getType() != null && TGRID.equals(suiteResult.getType().toLowerCase()) ? suiteResult.getSkippedTests() : suiteResult.getSuspectedTests();
+        com.extjs.gxt.ui.client.widget.Label skippedLabel = new com.extjs.gxt.ui.client.widget.Label(skippedTests +"");
+        String skippedTitle = suiteResult.getType() != null && TGRID.equals(suiteResult.getType().toLowerCase()) ? "skipped" : "suspected";
+        skippedLabel.setTitle("# " + skippedTitle + " tests");
         skippedLabel.addStyleName("orange-text");
 
         com.extjs.gxt.ui.client.widget.Label failedLabel = new com.extjs.gxt.ui.client.widget.Label(suiteResult.getFailedTests() +"");
@@ -390,7 +394,8 @@ public class Dashboard implements EntryPoint {
 
                         for(int resultsCounter : keysMap){
                             SuiteHistory suiteHistory = builds.get(resultsCounter);
-                            double percentPassed = ((double)suiteHistory.getPassedTestsHistory() / suiteHistory.getTotalTestsHistory() * 100);
+                            double percentPassed = ((double)suiteHistory.getPassedTestsHistory()
+                                    / (suiteHistory.getTotalTestsHistory() - suiteHistory.getSuspectedTestsHistory()) * 100);
                             String buildNumber = suiteHistory.getBuildNumber();
                             chart.addPoint( seriesName, new SeriesPoint().customProperty(buildNumber).x(resultsCounter).y(percentPassed), false);
                         }
