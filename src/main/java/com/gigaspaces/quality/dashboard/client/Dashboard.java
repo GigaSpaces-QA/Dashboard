@@ -48,6 +48,7 @@ public class Dashboard implements EntryPoint {
     public static final String SUITE_REPORT_LINK = "suite report link";
     public static final String TGRID = "tgrid";
     public static final String NIGHTLY_REGRESSION = "Nightly Regression";
+    public static final String CPP_REGRESSION = "Cpp Regression";
     private int curComponentsCountPerLastRow = 0;
     private HorizontalPanel _curRowPanel;
     private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
@@ -155,8 +156,9 @@ public class Dashboard implements EntryPoint {
 
         RowLayout rowLayout = new RowLayout(com.extjs.gxt.ui.client.Style.Orientation.VERTICAL);
         final ContentPanel contentPanel = new ContentPanel(rowLayout);
-        String rawName = suiteResult.getCompoundKey().getSuiteName().replace("_", " ").replace("-", " ");
-        rawName = NIGHTLY_REGRESSION.equals(suiteResult.getCompoundKey().getSuiteName()) && suiteResult.getJvmType() != null ?
+        String suiteNameBase = suiteResult.getCompoundKey().getSuiteName();
+        String rawName = suiteNameBase.replace("_", " ").replace("-", " ");
+        rawName = (NIGHTLY_REGRESSION.equals(suiteNameBase) || CPP_REGRESSION.equals(suiteNameBase)) && suiteResult.getJvmType() != null ?
                 rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ") : rawName;
         final String suiteName =  rawName;
 
