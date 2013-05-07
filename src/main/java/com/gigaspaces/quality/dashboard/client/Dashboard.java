@@ -160,7 +160,10 @@ public class Dashboard implements EntryPoint {
 		String rawName = suiteNameBase.replace("_", " ").replace("-", " ");
 		if(suiteResult.getJvmType() != null){
 			rawName = NIGHTLY_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
-					rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ") : rawName;
+                    (Character.isDigit(suiteResult.getJvmType().charAt(0)) ?
+					rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ")
+                            : rawName + " " + suiteResult.getJvmType())
+                    : rawName;
 			rawName = CPP_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
 					rawName + " " + suiteResult.getJvmType() : rawName;
 		}
