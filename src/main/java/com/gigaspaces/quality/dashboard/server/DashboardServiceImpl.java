@@ -40,7 +40,7 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
             List<String> xapVersions = getXAPVersions(entityManager);
             Map<String, List<SuiteResult>> results = new HashMap<String, List<SuiteResult>>();
 
-            String sqlFromQueryPart = "select * from ( select * from SgtestResult order by timestamp desc ) as t group by buildVersion, suiteName";
+            String sqlFromQueryPart = "select * from ( select * from SgtestResult order by timestamp desc ) as t group by buildVersion, suiteName, jvmType";
 
             List<SuiteResult> suiteResults = new ArrayList<SuiteResult>(
                     entityManager.createNativeQuery(sqlFromQueryPart, SuiteResult.class).getResultList());

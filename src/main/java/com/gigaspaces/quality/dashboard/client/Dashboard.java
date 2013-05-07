@@ -47,6 +47,7 @@ import java.util.*;
 public class Dashboard implements EntryPoint {
     public static final String SUITE_REPORT_LINK = "suite report link";
     public static final String TGRID = "tgrid";
+    public static final String NIGHTLY_REGRESSION = "Nightly Regression";
     private int curComponentsCountPerLastRow = 0;
     private HorizontalPanel _curRowPanel;
     private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
@@ -154,7 +155,12 @@ public class Dashboard implements EntryPoint {
 
         RowLayout rowLayout = new RowLayout(com.extjs.gxt.ui.client.Style.Orientation.VERTICAL);
         final ContentPanel contentPanel = new ContentPanel(rowLayout);
-        final String suiteName = suiteResult.getCompoundKey().getSuiteName().replace("_", " ").replace("-", " ");
+        String rawName = suiteResult.getCompoundKey().getSuiteName().replace("_", " ").replace("-", " ");
+        rawName = NIGHTLY_REGRESSION.equals(suiteResult.getCompoundKey().getSuiteName()) && suiteResult.getJvmType() != null ?
+                rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ") : rawName;
+        final String suiteName =  rawName;
+
+
         String name = suiteName.length() <= 22  && countUpperCaseLetters(suiteName) < 18 ? suiteName + "<br> </br>" : suiteName;
         contentPanel.setHeading(name);
         contentPanel.getHeader().setHeight("30px");
