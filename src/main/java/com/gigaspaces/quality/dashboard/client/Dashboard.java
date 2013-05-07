@@ -158,8 +158,10 @@ public class Dashboard implements EntryPoint {
         final ContentPanel contentPanel = new ContentPanel(rowLayout);
         String suiteNameBase = suiteResult.getCompoundKey().getSuiteName();
         String rawName = suiteNameBase.replace("_", " ").replace("-", " ");
-        rawName = (NIGHTLY_REGRESSION.equals(suiteNameBase) || CPP_REGRESSION.equals(suiteNameBase)) && suiteResult.getJvmType() != null ?
+        rawName = NIGHTLY_REGRESSION.equals(suiteNameBase) && suiteResult.getJvmType() != null ?
                 rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ") : rawName;
+        rawName = CPP_REGRESSION.equals(suiteNameBase) && suiteResult.getJvmType() != null ?
+                rawName + " " + suiteResult.getJvmType() : rawName;
         final String suiteName =  rawName;
 
 
