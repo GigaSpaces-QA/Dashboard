@@ -47,8 +47,8 @@ import java.util.*;
 public class Dashboard implements EntryPoint {
     public static final String SUITE_REPORT_LINK = "suite report link";
     public static final String TGRID = "tgrid";
-    public static final String NIGHTLY_REGRESSION = "Nightly Regression";
-    public static final String CPP_REGRESSION = "Cpp Regression";
+    public static final String NIGHTLY_REGRESSION = "nightly regression";
+    public static final String CPP_REGRESSION = "cpp regression";
     private int curComponentsCountPerLastRow = 0;
     private HorizontalPanel _curRowPanel;
     private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
@@ -157,11 +157,13 @@ public class Dashboard implements EntryPoint {
         RowLayout rowLayout = new RowLayout(com.extjs.gxt.ui.client.Style.Orientation.VERTICAL);
         final ContentPanel contentPanel = new ContentPanel(rowLayout);
         String suiteNameBase = suiteResult.getCompoundKey().getSuiteName();
-        String rawName = suiteNameBase.replace("_", " ").replace("-", " ");
-        rawName = NIGHTLY_REGRESSION.equals(suiteNameBase) && suiteResult.getJvmType() != null ?
-                rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ") : rawName;
-        rawName = CPP_REGRESSION.equals(suiteNameBase) && suiteResult.getJvmType() != null ?
-                rawName + " " + suiteResult.getJvmType() : rawName;
+		String rawName = suiteNameBase.replace("_", " ").replace("-", " ");
+		if(suiteResult.getJvmType() != null){
+			rawName = NIGHTLY_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
+					rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ") : rawName;
+			rawName = CPP_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
+					rawName + " " + suiteResult.getJvmType() : rawName;
+		}
         final String suiteName =  rawName;
 
 
