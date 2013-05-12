@@ -13,4 +13,7 @@ public interface Icons extends ClientBundle{
     
     @Source( "warning.png" )
     ImageResource warning();
+
+    @Source( "alarm.png" )
+    ImageResource alarm();
 }
