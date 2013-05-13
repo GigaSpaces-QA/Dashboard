@@ -10,7 +10,11 @@ import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import javax.persistence.EntityManager;
 import javax.persistence.EntityManagerFactory;
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 
 /**
@@ -21,7 +25,7 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
 
     private EntityManagerFactory entityManagerFactory;
     private static Properties props = new Properties();
-
+    private static final DateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.S");
     static {
         props = Utils.loadPropertiesFromClasspath("com/gigaspaces/quality/dashboard/server/versions.properties");
     }
@@ -104,9 +108,21 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
     }
 
     private void sortAccordingFailedTests(Map<String, CompoundSuiteHistoryResult> results){
+        final long old = System.currentTimeMillis() - TimeUnit.DAYS.toMillis(2);
         for(CompoundSuiteHistoryResult  compoundSuiteHistoryResult : results.values()){
             Collections.sort(compoundSuiteHistoryResult.getResults(), new Comparator<SuiteResult>(){
                 public int compare(SuiteResult s1, SuiteResult s2) {
+                    try {
+                        long s1Last = format.parse(s1.getTimestamp()).getTime();
+                        long s2Last = format.parse(s2.getTimestamp()).getTime();
+                        if(s1Last  < old || s2Last < old){
+                            return (int)(s1Last - s2Last);
+                        }
+                    } catch (ParseException e) {
+                        e.printStackTrace();
+                    }
+
+
                     double diff = (s1.getPassedTests() / (double)( s1.getTotalTestsRun() - s1.getSuspectedTests())) -
                             (s2.getPassedTests() / (double) (s2.getTotalTestsRun() - s2.getSuspectedTests()));
                     return diff > 0 ? 1 : diff < 0 ? -1 : 0;

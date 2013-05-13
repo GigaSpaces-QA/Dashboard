@@ -75,7 +75,7 @@ public class Dashboard implements EntryPoint {
         }
 
         public void addToRow( Widget widget ){
-           curRowPanel.add( widget );
+            curRowPanel.add( widget );
         }
 
         public void incrementComponentsCount(){
@@ -87,7 +87,7 @@ public class Dashboard implements EntryPoint {
         }
 
         public void resetComponentsCount(){
-               curComponentsCountPerLastRow=0;
+            curComponentsCountPerLastRow=0;
         }
     }
 
@@ -134,9 +134,13 @@ public class Dashboard implements EntryPoint {
                 Collections.reverse(versions);
 
                 for(String xapVersion : versions){
-                HorizontalPanel tabPanel = new HorizontalPanel();
+                    HorizontalPanel tabPanel = new HorizontalPanel();
                     ProductVerticalPanel xapPanel = new ProductVerticalPanel();
                     ProductVerticalPanel cloudifyPanel = new ProductVerticalPanel();
+
+
+                    xapPanel.addStyleName("xap-panel");
+                    cloudifyPanel.addStyleName("cloudify-panel");
 
                     tabPanel.add(xapPanel);
                     tabPanel.add(cloudifyPanel);
@@ -146,13 +150,11 @@ public class Dashboard implements EntryPoint {
                         List<SuiteHistory> history = compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName());
                         String suiteType = result.getType();
                         try{
-                        if(suiteType.equalsIgnoreCase("tgrid") || suiteType.equalsIgnoreCase("iTests-XAP")){
-                            addSuiteResult(xapPanel, result, history);
-                            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&& XAP" + result.getCompoundKey().getSuiteName());
-                        }else{
-                            addSuiteResult(cloudifyPanel, result, history);
-                            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&& CLOUDIFY" + result.getCompoundKey().getSuiteName());
-                        }
+                            if(suiteType.equalsIgnoreCase("tgrid") || suiteType.equalsIgnoreCase("iTests-XAP")){
+                                addSuiteResult(xapPanel, result, history);
+                            }else{
+                                addSuiteResult(cloudifyPanel, result, history);
+                            }
                         }catch (Throwable t){
                             t.printStackTrace();
                         }
@@ -182,7 +184,7 @@ public class Dashboard implements EntryPoint {
         }
         Widget suiteResultCell = createSuiteResultsGridCell(suiteResult, history, suiteResultsCellPerRow);
         panel.incrementComponentsCount();
-        panel.addToRow( suiteResultCell );
+        panel.addToRow(suiteResultCell);
     }
 
 
@@ -199,16 +201,16 @@ public class Dashboard implements EntryPoint {
         RowLayout rowLayout = new RowLayout(com.extjs.gxt.ui.client.Style.Orientation.VERTICAL);
         final ContentPanel contentPanel = new ContentPanel(rowLayout);
         String suiteNameBase = suiteResult.getCompoundKey().getSuiteName();
-		String rawName = suiteNameBase.replace("_", " ").replace("-", " ");
-		if(suiteResult.getJvmType() != null){
-			rawName = NIGHTLY_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
+        String rawName = suiteNameBase.replace("_", " ").replace("-", " ");
+        if(suiteResult.getJvmType() != null){
+            rawName = NIGHTLY_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
                     (Character.isDigit(suiteResult.getJvmType().charAt(0)) ?
-					rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ")
+                            rawName + " " + suiteResult.getJvmType().substring(2).replace("_", " ")
                             : rawName + " " + suiteResult.getJvmType())
                     : rawName;
-			rawName = CPP_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
-					rawName + " " + suiteResult.getJvmType() : rawName;
-		}
+            rawName = CPP_REGRESSION.equals(suiteNameBase.toLowerCase()) ?
+                    rawName + " " + suiteResult.getJvmType() : rawName;
+        }
         final String suiteName =  rawName;
 
 
@@ -424,7 +426,7 @@ public class Dashboard implements EntryPoint {
                 .minYValue(Math.max(0, (int)min - 2)).maxYValue(100)
                 .colors("#4572A7", "#AA4643", "#89A54E", "#80699B", "#3D96AE", "#DB843D", "#92A8CD", "#A47D7C", "#B5CA92")
                 .yAxisTickPixelInterval( 50 )
-                //.xAxisType( AxisType.LINEAR )
+                        //.xAxisType( AxisType.LINEAR )
                 .xAxisLineColor("#6098BF")
                 .xAxisGridLineColor("#98BCD5")
                 .yAxisLineColor("#6098BF")

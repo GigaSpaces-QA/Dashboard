@@ -113,8 +113,8 @@ h1 {
 }
 
 .gwt-Image {
-    width: 15px;
-    height: 15px;
+    width: 25px;
+    height: 25px;
 }
 
 .chart-dialog{
@@ -123,4 +123,14 @@ h1 {
     background-color: #F0F8FF;
     border: solid #000000 2px;
     border-radius: 10px;
+}
+
+.cloudify-panel {
+    border: solid black;
+    border-left-color: #ffffff;
+    padding-left: 10px;
+}
+
+.xap-panel{
+    border: solid black;
 }
