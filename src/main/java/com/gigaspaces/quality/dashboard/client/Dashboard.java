@@ -49,9 +49,9 @@ public class Dashboard implements EntryPoint {
     public static final String TGRID = "tgrid";
     public static final String NIGHTLY_REGRESSION = "nightly regression";
     public static final String CPP_REGRESSION = "cpp regression";
-    private int curComponentsCountPerLastRow = 0;
-    private HorizontalPanel _curRowPanel;
-    private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
+
+
+    //private List<VerticalPanel> verticalPanels = new ArrayList<VerticalPanel>();
     private DashboardServiceAsync dashboardServiceAsyncService = GWT.create( DashboardService.class );
     private int selectedItem = 0;
     private Chart chart;
@@ -60,6 +60,36 @@ public class Dashboard implements EntryPoint {
     private DateTimeFormat dateFormatterNoSec = DateTimeFormat.getFormat("dd/MM/yyyy HH:mm");
     private NumberFormat percentage = NumberFormat.getFormat("#.#%");
 
+    private class ProductVerticalPanel extends VerticalPanel{
+
+        private int curComponentsCountPerLastRow;
+        private HorizontalPanel curRowPanel;
+
+        public ProductVerticalPanel(){
+
+        }
+
+        public void createAndAddRow(){
+            curRowPanel = new HorizontalPanel();
+            add( curRowPanel );
+        }
+
+        public void addToRow( Widget widget ){
+           curRowPanel.add( widget );
+        }
+
+        public void incrementComponentsCount(){
+            curComponentsCountPerLastRow++;
+        }
+
+        public int getComponentsCount(){
+            return curComponentsCountPerLastRow;
+        }
+
+        public void resetComponentsCount(){
+               curComponentsCountPerLastRow=0;
+        }
+    }
 
     public void onModuleLoad() {
         RootPanel.getBodyElement().getStyle().setBackgroundColor("black");
@@ -102,22 +132,35 @@ public class Dashboard implements EntryPoint {
                 ArrayList<String> versions = new ArrayList<String>(keysMap);
                 Collections.sort(versions);
                 Collections.reverse(versions);
+
                 for(String xapVersion : versions){
-                    VerticalPanel panel = new VerticalPanel();
-                    verticalPanels.add(panel);
-                    //String xapVersion = "9.5.1";
+                HorizontalPanel tabPanel = new HorizontalPanel();
+                    ProductVerticalPanel xapPanel = new ProductVerticalPanel();
+                    ProductVerticalPanel cloudifyPanel = new ProductVerticalPanel();
+
+                    tabPanel.add(xapPanel);
+                    tabPanel.add(cloudifyPanel);
                     String cloudifyVersion = "";
+
                     for(SuiteResult result : compoundSuiteHistoryResults.get(xapVersion).getResults()){
                         List<SuiteHistory> history = compoundSuiteHistoryResults.get(xapVersion).getSuiteHistory().get(result.getCompoundKey().getSuiteName());
-                        addSuiteResult(panel, result, history);
+                        String suiteType = result.getType();
+                        try{
+                        if(suiteType.equalsIgnoreCase("tgrid") || suiteType.equalsIgnoreCase("iTests-XAP")){
+                            addSuiteResult(xapPanel, result, history);
+                            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&& XAP" + result.getCompoundKey().getSuiteName());
+                        }else{
+                            addSuiteResult(cloudifyPanel, result, history);
+                            System.out.println("&&&&&&&&&&&&&&&&&&&&&&&&&&&&& CLOUDIFY" + result.getCompoundKey().getSuiteName());
+                        }
+                        }catch (Throwable t){
+                            t.printStackTrace();
+                        }
                         if(cloudifyVersion.equals("") && history.size() != 0 && !xapVersion.equals(history.get(0).getBuildVersion()))
                             cloudifyVersion = "/" + history.get(0).getBuildVersion();
                     }
 
-                    mainPanel.add(panel, xapVersion + cloudifyVersion);
-
-                    _curRowPanel = null;
-                    curComponentsCountPerLastRow = 0;
+                    mainPanel.add(tabPanel, xapVersion + cloudifyVersion);
                 }
                 mainPanel.selectTab(selectedItem);
             }
@@ -130,17 +173,16 @@ public class Dashboard implements EntryPoint {
         return true;
     }
 
-    public void addSuiteResult(VerticalPanel panel, SuiteResult suiteResult, List<SuiteHistory> history){
-        int suiteResultsCellPerRow = 6;
+    public void addSuiteResult(ProductVerticalPanel panel, SuiteResult suiteResult, List<SuiteHistory> history){
+        int suiteResultsCellPerRow = 3;
 
-        if( curComponentsCountPerLastRow == 0 || curComponentsCountPerLastRow == suiteResultsCellPerRow ){
-            _curRowPanel = new HorizontalPanel();
-            panel.add( _curRowPanel );
-            curComponentsCountPerLastRow = 0;
+        if( panel.getComponentsCount() == 0 || panel.getComponentsCount() == suiteResultsCellPerRow ){
+            panel.createAndAddRow();
+            panel.resetComponentsCount();
         }
         Widget suiteResultCell = createSuiteResultsGridCell(suiteResult, history, suiteResultsCellPerRow);
-        curComponentsCountPerLastRow++;
-        _curRowPanel.add( suiteResultCell );
+        panel.incrementComponentsCount();
+        panel.addToRow( suiteResultCell );
     }
 
 
@@ -175,7 +217,7 @@ public class Dashboard implements EntryPoint {
         contentPanel.getHeader().setHeight("30px");
         contentPanel.setStyleName("suite-result");
 
-        final int width = (clientWidth / suiteResultsCellPerRow) - 10;
+        final int width = (clientWidth /2 / suiteResultsCellPerRow) - 10;
         contentPanel.setWidth(width);
         final int height = (clientHeight / 4) - 10;
         contentPanel.setHeight(height);
@@ -221,7 +263,10 @@ public class Dashboard implements EntryPoint {
         Image warningIcon = null;
         if(daysWithoutRun >= 2){
             warningIcon = new Image();
-            warningIcon.setUrl(IconsRepository.ICONS.warning().getSafeUri());
+            contentPanel.addStyleName("orange-border");
+            statusLabel.addStyleName("orange-text");
+            warningIcon.setPixelSize(width/2, IconsRepository.ICONS.alarm().getHeight() * width/2 / IconsRepository.ICONS.alarm().getWidth());
+            warningIcon.setUrl(IconsRepository.ICONS.alarm().getSafeUri());
         }
 
 
@@ -297,6 +342,13 @@ public class Dashboard implements EntryPoint {
 
         widgetList.add(link);
 
+        if(daysWithoutRun >= 2){
+            widgetList.remove(passedTestsPanel);
+            statusPanel.remove(statusLabel);
+            statusPanel.remove(icon);
+            widgetList.remove(link);
+
+        }
 
         //add components to main widget
         addAllWidgets(contentPanel, widgetList);
