@@ -121,8 +121,9 @@ public class DashboardServiceImpl extends RemoteServiceServlet implements Dashbo
                     } catch (ParseException e) {
                         e.printStackTrace();
                     }
-
-
+                    if(s1.getTotalTestsRun() == 0){
+                        return s1.getTotalTestsRun() - s2.getTotalTestsRun();
+                    }
                     double diff = (s1.getPassedTests() / (double)( s1.getTotalTestsRun() - s1.getSuspectedTests())) -
                             (s2.getPassedTests() / (double) (s2.getTotalTestsRun() - s2.getSuspectedTests()));
                     return diff > 0 ? 1 : diff < 0 ? -1 : 0;
