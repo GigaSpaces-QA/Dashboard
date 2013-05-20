@@ -239,8 +239,11 @@ public class Dashboard implements EntryPoint {
         }else{
 
             double successRate = ((double)passed / (total - suspectedTests));
-            statusLabel.setText(percentage.format(successRate));
+            String formatted = percentage.format(successRate);
+            statusLabel.setText(formatted);
             if(successRate >= 0.98 && successRate < 1){
+                if("100%".equals(formatted))
+                    statusLabel.setText("99.9%");
                 contentPanel.addStyleName("orange-border");
                 statusLabel.addStyleName("orange-text");
                 icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
