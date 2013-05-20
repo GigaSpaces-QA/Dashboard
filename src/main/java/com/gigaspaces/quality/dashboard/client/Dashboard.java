@@ -235,6 +235,7 @@ public class Dashboard implements EntryPoint {
         if(total == 0){
             statusLabel.setText("No Test Runs");
             statusLabel.addStyleName("red-text");
+            statusLabel.addStyleName("red-border");
             icon.setUrl( IconsRepository.ICONS.thumbDown().getSafeUri() );
         }else{
 
